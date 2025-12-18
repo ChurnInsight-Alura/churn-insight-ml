@@ -1,0 +1,33 @@
+# ===============================
+# Archivos de código y notebooks
+# ===============================
+*.py text eol=lf
+*.ipynb text eol=lf
+
+# ===============================
+# Archivos binarios (modelos, datasets, imágenes)
+# ===============================
+*.h5 binary
+*.pkl binary
+*.joblib binary
+*.pt binary
+*.ckpt binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.csv binary
+*.parquet binary
+
+# Carpeta de datos crudos y procesados
+data/* binary
+models/* binary
+outputs/* binary
+
+# ===============================
+# Documentación y otros textos
+# ===============================
+*.md text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
