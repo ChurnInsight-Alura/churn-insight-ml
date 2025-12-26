@@ -73,84 +73,63 @@ cada área.
 ### [archivo](https://github.com/<link_hacia_el_dataset>)
 
 
-
+, , , , ,
+       , , , , , ,
+       , , , ,
+       `cluster_time`, `wealth_score`, `cluster_wealth`, `engagement_score`,
+       `cluster_engagement`, `wealth_score_norm`, `engagement_score_norm`,
+       `cluster_time_num`, `final_score`, `cluster_final`, `CustomerSegment`
 
 
 #### **Clientes**
 
-|Índice	| Variable	 | Definición Funcional	              |
-|-------|------------|------------------------------------|
-|0	    | Periodo	   | Mes de la toma de datos (YYYYMM).  | 
-|1	    | CodCli	   | Identificador único del cliente.	  | 
-|2	    | Edad	     | Edad del cliente.	                |
-|3	    | Gener	     | Generación (Baby Boomer, X, Y, Z). |
-|4	    | EstCiv	   | Estado Civil.                      | 
-|5	    | Sexo	     | Género.                            |
-|6	    | NZona	     | Zona geográfica/Sucursal .         |
-|9	    | NivEduc	   | Nivel educativo.                   |
+| Variable	        | Tipo de dato      | Definición Funcional	                                      |
+|-------------------|-------------------|------------------------------------------------------------|
+| `RowNumber`	     | String            | Índice de fila                                             | 
+| `CustomerId`	     | Integer           | Identificador único del cliente.	                          | 
+| `Surname`	        | String            | Apellido del cliente.	                                   |
+| `CreditScore`	  | Integer           | Puntaje crediticio                                         |
+| `Geography`	     | String            | País de residencia                                         | 
+| `Gender`	        | String            | Género.                                                    |
+| `Age`	           | Integer           | Edad.                                                      |
+| `Tenure`	        | Integer           | Antigüedad en meses                                        |
+| `Balance`         | Float             | Balance actual en su cuenta                                |
+| `NumOfProducts`   | Integer           | Cantidad de productos contratados                          | 
+| `HasCrCard`       | Integer           | Tiene tarjeta de crédito, si o no (1 o 0)                  | 
+| `IsActiveMember`  | Integer           | Utiliza servicios y promociones del banco, si o no (1 o 0) |
+| `EstimatedSalary` | Float             | Salario mensual estimado                                   |
 
 
 #### **Transacciones**
 
-| Índice | Variable	  | Definición Funcional	                         |
-|--------|------------|------------------------------------------------|
-| 7	     | Ingreso	  | Ingreso mensual del cliente.	                 |
-| 8	     | TipIng	    | Tipo: Dependiente vs Independiente.            |
-| 10	   | RentSol	  | Renta declarada en la solicitud.	             |
-| 11	   | AntiClie	  | Antigüedad bancaria (meses).	                 |
-| 12	   | SectConv	  | Sector de la empresa (Salud, Educación, etc.). |
-| 29	   | Activos	  | Patrimonio del cliente.	                       |
-
+| Variable	          | Tipo de dato   | Definición Funcional                                        |
+|---------------------|----------------|-------------------------------------------------------------|
+| `TransactionId`     | String	      | Ingreso mensual del cliente.	                             |
+| `CusomerId`	       | Int            | Identificador único del cliente que realizó la transacción  |
+| `TransactionDate`	 | Datetime       | Renta declarada en la solicitud.	                          |
+| `Amount`	          | Float          | Monto de la transacción                                     |
+| `TransactionType`	 | String         | Tipo de transacción realizada (Ej.: TRANSFER, PAYMENT, etc) |
 
 #### **Features: Características del Crédito**
 
-| Índice | Variable	  | Definición Funcional	                                              |
-|--------|------------|---------------------------------------------------------------------|
-| 13	   | FechAprob  |	Fecha de aprobación.	                                              |
-| 14	   | FechAper	  | Fecha de apertura/desembolso.	                                      |
-| 15	   | FechVenc	  | Fecha de vencimiento.	                                              |
-| 16	   | Desem	    | Monto original prestado.                                            |
-| 17	   | TasaSol	  | Tasa de interés (TEA).                                              |
-| 20	   | TipoOper	  | Nuevo vs Reenganche.	Reenganche = Cliente retenido anteriormente.  |
-| 21	   | CuoPac	    | Plazo original (meses).	                                            |
-| 22	   | CuoTot	    | Plazo total (incluye reprogramaciones).	                            |
-
-#### **Features: Comportamiento Interno y Estado de Deuda**
-
-| Índice   | Variable	    | Definición Funcional	                                            |
-|----------|--------------|-------------------------------------------------------------------|
-| 18	     | SalCap	      | Saldo Capital (Lo que debe hoy).	Fundamental.                    |
-| 19	     | SalInt	      | Intereses pendientes.	                                            |
-| 23	     | CuoPag	      | Cuotas pagadas.	Usar para crear ratio de avance (CuoPag/CuoTot).  |
-| 24	     | CuoPen	      | Cuotas pendientes.	                                              |
-| 25	     | NroReen	    | Cantidad de renovaciones históricas.                              |
-| 26	     | FlagReEn	    | ¿El crédito actual es renovado?	                                  |
-| 27	     | CantReprog	  | Cantidad de reprogramaciones.                                     |
-| 30	     | CrossSell	  | Tenencia de otros productos.	                                    |
-
-#### **Features: Sistema Financiero Externo (Competencia)**
-
-| Índice	| Variable	   | Definición Funcional	                               |
-|---------|--------------|-----------------------------------------------------|
-| 28	    | Pasivos	     | Deuda total en todo el sistema.	                   |
-| 31	    | SaldoRCC	   | Deuda reportada al regulador (Total).	             |
-| 32	    | SaldoRCC_X   | Deuda con la Competencia (Otros bancos).	           |
-| 33	    | MaxSalConv   | Máximo endeudamiento histórico.	                   |
-| 34	    | PromSalConv  | Promedio endeudamiento histórico.	                 |
-| 35	    | PromSowConv	 | Share of Wallet (% Deuda con nosotros).	           |
-| 36	    | VarAnualConv | Variación de deuda anual.	                         |
-| 37	    | CantCalifN	 | Meses con calificación "Normal".	                   |
-| 38	    | PropCalifN	 | Proporción de calificación "Normal".	               |
-| 39	    | PromCantEmp	 | Promedio histórico de entidades acreedoras.	       |
-| 40	    | CantEmp	     | Cantidad actual de bancos con los que tiene deuda.	 |
-| 41	    | Calif_Final	 | Calificación de riesgo (Normal, CPP, etc).          |
+| Variable	     | Tipo de dato   | Definición Funcional                                  |
+|----------------|----------------|-------------------------------------------------------|
+| `SessionId`    | String         | Identificador único de log de sesión                  |
+| `CustomerId`   | Int            | Identificador único del cliente que ejecutó la sesión |
+| `SessionDate`  | Datetime       | Fecha de la sesión                                    |
+| `DurationMin`  | Float          | Duración de la sesion en minutos                      |
+| `UsedTransfer` | Int            | Usó opción de transferencia, si o no (1 o 0)          |
+| `UsedPayment`  | Int            | Usó opción de pago, si o no (1 o 0)                   |
+| `UsedInvest`   | Int            | Usó opción de inversión, si o no (1 o 0)              |
+| `OpenedPush`   | Int            | Abrió notificación, si o no (1 o 0)                   |
+| `FailedLogin`  | Int            | Falló el inicio de sesión, si o no (1 o 0)            |
 
 
 #### Target
 
-| Índice | Variable                      | Descripción Funcional                                                                      | 
-|--------|-------------------------------|--------------------------------------------------------------------------------------------| 
-| 42     | `FlagDeser`                   | Condición de abando: 1 = Churn (Canceló) | 0 = No Churn (Permanencia)                       |
+| Variable      | Tipo de dato   | Descripción Funcional                                                                      | 
+|---------------|----------------|--------------------------------------------------------------------------------------------| 
+| `Exited`      | Int            | Condición de abando: 1 = Churn (Canceló) | 0 = No Churn (Permanencia)                      |
 
 
 
