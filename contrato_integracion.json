@@ -1,0 +1,44 @@
+{
+  "IN": {
+    "clientes": {
+      "RowNumber": "integer",
+      "CustomerId": "string",
+      "Surname": "string",
+      "CreditScore": "integer",
+      "Geography": "string",
+      "Gender": "integer",
+      "Age": "integer",
+      "Tenure": "integer",
+      "Balance": "float",
+      "NumOfProducts": "integer",
+      "HasCrCard": "integer",
+      "IsActiveMember": "integer",
+      "EstimatedSalary": "float"
+    },
+    "transacciones": {
+      "TransactionId": "string",
+      "CustomerId": "string",
+      "TransactionDate": "datetime",
+      "Amount": "float",
+      "TransactionType": "string"
+    },
+    "sesiones": {
+      "SessionId": "string",
+      "CustomerId": "string",
+      "SessionDate": "datetime",
+      "DurationMin": "float",
+      "UsedTransfer": "integer",
+      "UsedPayment": "integer",
+      "UsedInvest": "integer",
+      "OpenedPush": "integer",
+      "FailedLogin": "integer"
+    }
+  },
+  "OUT": {
+    "CustomerId": "string",
+    "PredictedProba": "float",
+    "PredictedLabel": "integer",
+    "CustomerSegment": "string",
+    "InterventionPriority": "string"
+  }
+}
