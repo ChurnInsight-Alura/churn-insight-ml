@@ -1,0 +1,47 @@
+# ===============================
+# Python
+# ===============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv/
+*.env
+
+# ===============================
+# Jupyter Notebooks
+# ===============================
+.ipynb_checkpoints/
+
+# ===============================
+# Datos
+# ===============================
+data/raw/
+data/processed/
+data/interim/
+data/external/
+
+# ===============================
+# Modelos
+# ===============================
+models/
+*.h5
+*.pkl
+*.joblib
+*.pt
+*.ckpt
+
+# ===============================
+# Salidas / resultados
+# ===============================
+outputs/
+logs/
+
+# ===============================
+# IDEs y editores
+# ===============================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
