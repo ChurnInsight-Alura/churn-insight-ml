@@ -9,7 +9,7 @@
 1. Descripción del proyecto
 2. Acceso al proyecto
 3. Etapas del proyecto
-4. Data Catalog (Catálogo de datos)
+4. Catálogo de datos
 5. Resultados y conclusiones
 6. Tecnologías utilizadas
 7. Agradecimientos
@@ -20,7 +20,22 @@
 
 ## 1. Descripción del proyecto 📚
 
-Proveer con una breve explicación sobre lo que encontrará el usuario al visitar nuestro proyecto, que incluya el objetivo del mismo, las tareas realizadas, y una descripción del producto final presentado
+### **Contexto del Negocio** 
+
+El proyecto se centra en el producto de Préstamos por Convenio (Nómina) del "Banco Z" en Perú. Este producto se caracteriza por un bajo riesgo de morosidad (descuento por planilla), lo que convierte a estos clientes en perfiles altamente deseados por el sistema financiero. El problema principal es la Deserción Voluntaria por Compra de Deuda: la competencia ofrece mejores condiciones (menores tasas) para captar sus mejores clientes.
+
+### **Objetivo** 
+
+Reducir la pérdida de cartera vigente y aumentar el Lifetime Value (LTV) del cliente mediante la detección temprana de intenciones de prepago o compra de deuda.
+
+### **La Solución** 
+
+Hemos desarrollado un MVP End-to-End que integra un modelo de Machine Learning con una API REST funcional.
+
+***Enfoque de Data Science:** Entrenamos un modelo de clasificación binaria utilizando datos históricos transaccionales, demográficos y del buró de crédito (RCC). Identificamos variables clave <VARIABLES> para evitar la deserción.
+
+***Enfoque de Backend:*** Disponibilizamos el modelo a través de una API (Java/Spring Boot) que permite al negocio consultar el riesgo de un cliente en tiempo real, devolviendo una predicción clara ("Deserción" / "No Deserción") y su probabilidad asociada.
+
 
 
 ## 2. Acceso al proyecto 📂
@@ -61,7 +76,7 @@ cada área.
 
 
 
-#### **Features: Identificación y Demografía**
+#### **Clientes**
 
 |Índice	| Variable	 | Definición Funcional	              |
 |-------|------------|------------------------------------|
@@ -75,7 +90,7 @@ cada área.
 |9	    | NivEduc	   | Nivel educativo.                   |
 
 
-#### **Features: Perfil Laboral y Económico**
+#### **Transacciones**
 
 | Índice | Variable	  | Definición Funcional	                         |
 |--------|------------|------------------------------------------------|
