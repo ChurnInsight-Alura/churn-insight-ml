@@ -1,5 +1,6 @@
 # **Fintech - Customer Churn**
 
+<img width="1024" height="638" alt="ChatGPT Image Dec 19, 2025, 10_52_55 AM" src="https://github.com/user-attachments/assets/c6570e83-b0dd-474e-86ba-ebe7fee664ac" />
 
 
 ---
@@ -22,17 +23,16 @@
 
 ### **Contexto del Negocio** 
 
-El proyecto se centra en el producto de Préstamos por Convenio (Nómina) del "Banco Z" en Perú. Este producto se caracteriza por un bajo riesgo de morosidad (descuento por planilla), lo que convierte a estos clientes en perfiles altamente deseados por el sistema financiero. El problema principal es la Deserción Voluntaria por Compra de Deuda: la competencia ofrece mejores condiciones (menores tasas) para captar sus mejores clientes.
 
 ### **Objetivo** 
 
-Reducir la pérdida de cartera vigente y aumentar el Lifetime Value (LTV) del cliente mediante la detección temprana de intenciones de prepago o compra de deuda.
+Reducir la pérdida de cartera vigente y aumentar el Lifetime Value (LTV) del cliente mediante 
 
 ### **La Solución** 
 
 Hemos desarrollado un MVP End-to-End que integra un modelo de Machine Learning con una API REST funcional.
 
-***Enfoque de Data Science:** Entrenamos un modelo de clasificación binaria utilizando datos históricos transaccionales, demográficos y del buró de crédito (RCC). Identificamos variables clave <VARIABLES> para evitar la deserción.
+***Enfoque de Data Science:** Entrenamos un modelo de clasificación binaria utilizando datos históricos transaccionales y de interacción con la aplicación, así como datos demográficos. Identificamos variables clave <VARIABLES> para evitar la deserción.
 
 ***Enfoque de Backend:*** Disponibilizamos el modelo a través de una API (Java/Spring Boot) que permite al negocio consultar el riesgo de un cliente en tiempo real, devolviendo una predicción clara ("Deserción" / "No Deserción") y su probabilidad asociada.
 
@@ -68,17 +68,7 @@ cada área.
 
 <br><br><br>
 
-## 4. Data Catalog (Catálogo de datos)
-
-### [archivo](https://github.com/<link_hacia_el_dataset>)
-
-
-, , , , ,
-       , , , , , ,
-       , , , ,
-       `cluster_time`, `wealth_score`, `cluster_wealth`, `engagement_score`,
-       `cluster_engagement`, `wealth_score_norm`, `engagement_score_norm`,
-       `cluster_time_num`, `final_score`, `cluster_final`, `CustomerSegment`
+## 4. Catálogo de Datos
 
 
 #### **Clientes**
@@ -110,7 +100,7 @@ cada área.
 | `Amount`	          | Float          | Monto de la transacción                                     |
 | `TransactionType`	 | String         | Tipo de transacción realizada (Ej.: TRANSFER, PAYMENT, etc) |
 
-#### **Features: Características del Crédito**
+#### **Interacciones con la Aplicación**
 
 | Variable	     | Tipo de dato   | Definición Funcional                                  |
 |----------------|----------------|-------------------------------------------------------|
