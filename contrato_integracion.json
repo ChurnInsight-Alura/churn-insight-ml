@@ -6,7 +6,7 @@
       "Surname": "string",
       "CreditScore": "integer",
       "Geography": "string",
-      "Gender": "integer",
+      "Gender": "string",
       "Age": "integer",
       "Tenure": "integer",
       "Balance": "float",
