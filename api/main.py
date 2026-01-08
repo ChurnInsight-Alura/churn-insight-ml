@@ -380,8 +380,8 @@ def predict_single_customer(data: FullCustomerData):
     
     return {
         "CustomerId": data.cliente.CustomerId,
-        "ChurnProbability": (round(prob, 4)) * 100,
-        "ChurnPrediction": prediction,
+        "PredictedProba": (round(prob, 4)) * 100,
+        "PredictedLabel": prediction,
         "CustomerSegment": customer_segment,
         "InterventionPriority": priority
     }
