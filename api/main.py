@@ -400,5 +400,86 @@ def predict_batch(batch_data: List[FullCustomerData]):
     {}
     return results
 
+
+
+@app.post("/predict/batch_stats")
+def predict_batch_stats(batch_data: List[FullCustomerData]):
+    """
+    Predicción masiva que devuelve un JSON con estadísticas agregadas del lote.
+    """
+    processed_rows = []
+
+    # 1. Iteramos sobre el batch para construir un DataFrame con todo lo necesario
+    for data in batch_data:
+        # A. Obtenemos la predicción (Reutilizamos tu función existente para garantizar consistencia)
+        pred_res = predict_single_customer(data)
+        
+        # B. Obtenemos las features calculadas (Necesitamos los días desde tx/ss)
+        # engineer_features devuelve un DataFrame de 1 fila, sacamos los valores.
+        feats_df = engineer_features(data)
+        
+        # C. Armamos la fila combinada
+        row = {
+            'PredictedLabel': pred_res['PredictedLabel'],
+            'InterventionPriority': pred_res['InterventionPriority'],
+            'Geography': data.cliente.Geography, # Usamos el string original (France, Spain, Germany)
+            'IsActiveMember': data.cliente.IsActiveMember,
+            'days_since_last_tx': feats_df['days_since_last_tx'].values[0],
+            'days_since_last_ss': feats_df['days_since_last_ss'].values[0]
+        }
+        processed_rows.append(row)
+
+    # 2. Convertimos a DataFrame para cálculos rápidos
+    df = pd.DataFrame(processed_rows)
+
+    if df.empty:
+        return {"error": "El batch está vacío"}
+
+    # 3. Cálculos Estadísticos
+    
+    # Conteos de Prioridad (Usamos value_counts y convertimos a dict para acceso seguro)
+    priority_counts = df['InterventionPriority'].value_counts().to_dict()
+
+    # Filtro de Churners (Solo los que PredictedLabel es 1)
+    churners = df[df['PredictedLabel'] == 1]
+
+    # Cálculos de Desviación Estándar (Manejo de NaN si solo hay 1 dato)
+    std_tx = df['days_since_last_tx'].std()
+    std_ss = df['days_since_last_ss'].std()
+    
+    # Si std es NaN (batch de 1 solo dato), lo pasamos a 0.0
+    if pd.isna(std_tx): std_tx = 0.0
+    if pd.isna(std_ss): std_ss = 0.0
+
+    # 4. Construcción del JSON de respuesta exacto
+    stats = {
+        # -- Conteo de Etiquetas (Priorities) --
+        # Usamos .get() por si alguna categoría no aparece en este batch específico
+        'QtyCritical': int(priority_counts.get("CRÍTICO - Llamar Inmediatamente", 0)),
+        'QtyHigh-Incentive': int(priority_counts.get("Alta - Ofrecer Incentivo", 0)),
+        'QtyHigh-Personalized': int(priority_counts.get("Alta - Chequeo Personalizado", 0)),
+        'QtyMedium-Monitor': int(priority_counts.get("Media - Monitorear", 0)),
+        'QtyMedium-Mail': int(priority_counts.get("Media - Correo Electrónico Automático", 0)),
+        'QtyLow': int(priority_counts.get("Baja - Mantener Contento", 0)),
+        
+        # -- Estadísticas Generales --
+        'QtyIsActiveMember': int(df['IsActiveMember'].sum()),
+
+        # -- Churners por Geografía --
+        # Nota: Tu modelo recibe 'Geography' como string ("Germany", "Spain", "France").
+        # Filtramos por país Y por PredictedLabel == 1
+        'ChurnersGermany': int(len(churners[churners['Geography'] == 'Germany'])),
+        'ChurnersSpain': int(len(churners[churners['Geography'] == 'Spain'])),
+        'ChurnersFrance': int(len(churners[churners['Geography'] == 'France'])),
+
+        # -- Estadísticas de Tiempo --
+        'AvgTxDaysSinceLast': float(round(df['days_since_last_tx'].mean(), 2)),
+        'StdTxDaysSinceLast': float(round(std_tx, 2)),
+        'AvgSsDaysSinceLast': float(round(df['days_since_last_ss'].mean(), 2)),
+        'StdSsDaysSinceLast': float(round(std_ss, 2))
+    }
+
+    return stats
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
