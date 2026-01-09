@@ -92,11 +92,11 @@ def engineer_features(data: FullCustomerData) -> pd.DataFrame:
     # Asumimos que el corte es HOY. 
     # Q3 = Últimos 90 días
     # Q2 = Hace 90-180 días
-    # Q1 = Hace 180-270 días
+    # Q1 = Hace 180-275 días
     cutoff_date = datetime.now()
     window_3_start = cutoff_date - timedelta(days=90)
     window_2_start = cutoff_date - timedelta(days=180)
-    window_1_start = cutoff_date - timedelta(days=270)
+    window_1_start = cutoff_date - timedelta(days=275)
 
     # ---------------- PROCESAMIENTO DE TRANSACCIONES ----------------
     if not data.transacciones:
@@ -394,6 +394,10 @@ def predict_batch(batch_data: List[FullCustomerData]):
         # Reutiliza la lógica individual
         res = predict_single_customer(customer)
         results.append(res)
+
+    df_results = pd.DataFrame(results)
+
+    {}
     return results
 
 if __name__ == "__main__":
