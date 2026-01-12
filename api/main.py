@@ -421,7 +421,7 @@ def predict_batch_stats(batch_data: List[FullCustomerData]):
             'InterventionPriority': pred_res['InterventionPriority'],
             'Geography': data.cliente.Geography,
             'IsActiveMember': data.cliente.IsActiveMember,
-            'Balance': data.cliente.Balance,  # <--- IMPORTANTE: Capturamos el dinero aquí
+            'Balance': data.cliente.Balance,
             # Variables de Tiempo
             'days_since_last_tx': feats_df['days_since_last_tx'].values[0],
             'days_since_last_ss': feats_df['days_since_last_ss'].values[0],
@@ -458,10 +458,22 @@ def predict_batch_stats(batch_data: List[FullCustomerData]):
     churn_count = len(churners)
     churn_prop = (churn_count / total_clients) * 100 if total_clients > 0 else 0.0
 
+    # --- NUEVA LÓGICA: CRUCE ACTIVIDAD vs PREDICCIÓN ---
+    # Active (1) & No se va (0)
+    act_exit_0 = len(df[(df['IsActiveMember'] == 1) & (df['PredictedLabel'] == 0)])
+    # Active (1) & Se va (1) -> ¡PELIGROSO!
+    act_exit_1 = len(df[(df['IsActiveMember'] == 1) & (df['PredictedLabel'] == 1)])
+    
+    # Inactive (0) & No se va (0)
+    inact_exit_0 = len(df[(df['IsActiveMember'] == 0) & (df['PredictedLabel'] == 0)])
+    # Inactive (0) & Se va (1) -> ¡LO ESPERADO!
+    inact_exit_1 = len(df[(df['IsActiveMember'] == 0) & (df['PredictedLabel'] == 1)])
+
+
     # 4. Construcción del JSON
     stats = {
         # --- KPIs FINANCIEROS Y DE NEGOCIO ---
-        'ChurnersTotalBalance': float(round(churners['Balance'].sum(), 2)), # <--- EL DATO DE DINERO
+        'ChurnersTotalBalance': float(round(churners['Balance'].sum(), 2)),
         'DonutGreen': qty_low,
         'DonutRed': qty_red_donut,
         'CustomerChurnProp': float(round(churn_prop, 2)),
@@ -474,9 +486,13 @@ def predict_batch_stats(batch_data: List[FullCustomerData]):
         'QtyMedium-Mail': int(priority_counts.get("Media - Correo Electrónico Automático", 0)),
         'QtyLow': qty_low,
         
-        # --- ESTADÍSTICAS GENERALES Y GEO ---
-        'QtyIsActiveMember': int(df['IsActiveMember'].sum()),
-        'QtyIsNOTActiveMember': total_clients - int(df['IsActiveMember'].sum()),
+        # --- MATRIZ DE ACTIVIDAD ---
+        'QtyIsActiveMemberExit_0': int(act_exit_0),
+        'QtyIsActiveMemberExit_1': int(act_exit_1),
+        'QtyIsNOTActiveMemberExit_0': int(inact_exit_0),
+        'QtyIsNOTActiveMemberExit_1': int(inact_exit_1),
+
+        # --- ESTADÍSTICAS GEO ---
         'ChurnersGermany': int(len(churners[churners['Geography'] == 'Germany'])),
         'ChurnersSpain': int(len(churners[churners['Geography'] == 'Spain'])),
         'ChurnersFrance': int(len(churners[churners['Geography'] == 'France'])),
