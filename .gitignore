@@ -27,7 +27,7 @@ data/external/
 # ===============================
 models/
 *.h5
-*.pkl
+# *.pkl
 *.joblib
 *.pt
 *.ckpt
