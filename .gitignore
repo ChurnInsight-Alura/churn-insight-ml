@@ -42,25 +42,6 @@ logs/
 # IDEs y editores
 # ===============================
 .vscode/
-
-
-
-# ======================================
-# Archivos específicos de este proyecto
-# ======================================
-
-# Ignorar archivos de datos pesados en CUALQUIER carpeta
-*.parquet
-*.csv
-
-# En caso de querer subir el archivo original de churn, eliminar # de la siguiente linea
-# !src/churn.csv 
-
-# Ignorar carpeta de datos mensuales en src
-src/monthly_data/
-
-# Ignorar la carpeta de imágenes (si son plots generados automáticamente)
-img/
 .idea/
 *.sublime-project
 *.sublime-workspace
