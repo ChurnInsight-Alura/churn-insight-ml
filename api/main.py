@@ -395,10 +395,104 @@ def predict_batch(batch_data: List[FullCustomerData]):
         res = predict_single_customer(customer)
         results.append(res)
 
-    df_results = pd.DataFrame(results)
-
-    {}
+    
     return results
+
+
+
+@app.post("/predict/batch_stats")
+def predict_batch_stats(batch_data: List[FullCustomerData]):
+    """
+    Predicción masiva que devuelve estadísticas de negocio, financieras y de tendencia.
+    """
+    processed_rows = []
+
+    # 1. Iteramos sobre el batch para construir un DataFrame maestro
+    for data in batch_data:
+        # A. Predicción
+        pred_res = predict_single_customer(data)
+        
+        # B. Feature Engineering
+        feats_df = engineer_features(data)
+        
+        # C. Armamos la fila combinada
+        row = {
+            'PredictedLabel': pred_res['PredictedLabel'],
+            'InterventionPriority': pred_res['InterventionPriority'],
+            'Geography': data.cliente.Geography,
+            'IsActiveMember': data.cliente.IsActiveMember,
+            'Balance': data.cliente.Balance,  # <--- IMPORTANTE: Capturamos el dinero aquí
+            # Variables de Tiempo
+            'days_since_last_tx': feats_df['days_since_last_tx'].values[0],
+            'days_since_last_ss': feats_df['days_since_last_ss'].values[0],
+            # Variables de Tendencia
+            'tx_q2q3_rate_of_change': feats_df['tx_q2q3_rate_of_change'].values[0],
+            'ss_q2q3_rate_of_change': feats_df['ss_q2q3_rate_of_change'].values[0]
+        }
+        processed_rows.append(row)
+
+    # 2. Convertimos a DataFrame
+    df = pd.DataFrame(processed_rows)
+
+    if df.empty:
+        return {"error": "El batch está vacío"}
+
+    # 3. Cálculos Estadísticos
+    
+    total_clients = len(df)
+    priority_counts = df['InterventionPriority'].value_counts().to_dict()
+    
+    # Filtro de Churners (La base de todos los riesgos)
+    churners = df[df['PredictedLabel'] == 1]
+
+    # -- Cálculos de Seguridad (Std y Nans) --
+    def safe_std(series):
+        val = series.std()
+        return 0.0 if pd.isna(val) else val
+
+    # -- Lógica Donut Chart --
+    qty_low = int(priority_counts.get("Baja - Mantener Contento", 0))
+    qty_red_donut = total_clients - qty_low
+    
+    # -- Lógica Churn Rate --
+    churn_count = len(churners)
+    churn_prop = (churn_count / total_clients) * 100 if total_clients > 0 else 0.0
+
+    # 4. Construcción del JSON
+    stats = {
+        # --- KPIs FINANCIEROS Y DE NEGOCIO ---
+        'ChurnersTotalBalance': float(round(churners['Balance'].sum(), 2)), # <--- EL DATO DE DINERO
+        'DonutGreen': qty_low,
+        'DonutRed': qty_red_donut,
+        'CustomerChurnProp': float(round(churn_prop, 2)),
+
+        # --- DETALLE DE PRIORIDADES (Embudo) ---
+        'QtyCritical': int(priority_counts.get("CRÍTICO - Llamar Inmediatamente", 0)),
+        'QtyHigh-Incentive': int(priority_counts.get("Alta - Ofrecer Incentivo", 0)),
+        'QtyHigh-Personalized': int(priority_counts.get("Alta - Chequeo Personalizado", 0)),
+        'QtyMedium-Monitor': int(priority_counts.get("Media - Monitorear", 0)),
+        'QtyMedium-Mail': int(priority_counts.get("Media - Correo Electrónico Automático", 0)),
+        'QtyLow': qty_low,
+        
+        # --- ESTADÍSTICAS GENERALES Y GEO ---
+        'QtyIsActiveMember': int(df['IsActiveMember'].sum()),
+        'QtyIsNOTActiveMember': total_clients - int(df['IsActiveMember'].sum()),
+        'ChurnersGermany': int(len(churners[churners['Geography'] == 'Germany'])),
+        'ChurnersSpain': int(len(churners[churners['Geography'] == 'Spain'])),
+        'ChurnersFrance': int(len(churners[churners['Geography'] == 'France'])),
+
+        # --- SECCIÓN TRANSACCIONES (KPIs + Velocímetro) ---
+        'AvgTxDaysSinceLast': float(round(df['days_since_last_tx'].mean(), 2)),
+        'StdTxDaysSinceLast': float(round(safe_std(df['days_since_last_tx']), 2)),
+        'AvgTxRateChange': float(round(df['tx_q2q3_rate_of_change'].mean(), 4)),
+
+        # --- SECCIÓN SESIONES (KPIs + Velocímetro) ---
+        'AvgSsDaysSinceLast': float(round(df['days_since_last_ss'].mean(), 2)),
+        'StdSsDaysSinceLast': float(round(safe_std(df['days_since_last_ss']), 2)),
+        'AvgSsRateChange': float(round(df['ss_q2q3_rate_of_change'].mean(), 4))
+    }
+
+    return stats
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
