@@ -329,7 +329,7 @@ def calculate_priority(churn_prob: float, segment: str) -> str:
         return "Baja - Mantener Contento"
     
     # Si la probabilidad es ALTA, vemos quién es el cliente
-    if churn_prob > 0.6:
+    if churn_prob > 0.7:
         if segment in ['VIP', 'Valioso - Bajo compromiso']:
             return "CRÍTICO - Llamar Inmediatamente" # Es valioso y se va a ir
         elif segment in ['Cliente potencial', 'Standard']:
@@ -337,7 +337,7 @@ def calculate_priority(churn_prob: float, segment: str) -> str:
         else:
             return "Media - Correo Electrónico Automático" # Es 'Poco Valor', no gastamos recursos caros
             
-    # Zona gris (probabilidad media [umbral de decision - 0.6])
+    # Zona gris (probabilidad media [umbral de decision - 0.7])
     if segment == 'VIP':
         return "Alta - Chequeo Personalizado"
         
@@ -465,7 +465,7 @@ def predict_batch_stats(batch_data: List[FullCustomerData]):
 
     # 2. Convertimos a DataFrame
     df = pd.DataFrame(processed_rows)
-    
+
     if df.empty:
         return {"error": "El batch está vacío"}
 
