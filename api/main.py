@@ -113,29 +113,41 @@ def engineer_features(data: FullCustomerData) -> pd.DataFrame:
         df_tx['TransactionDate'] = pd.to_datetime(df_tx['TransactionDate'])
         
         # Filtros de Ventana
-        tx_q3 = df_tx[(df_tx['TransactionDate'] >= window_3_start)]
+        tx_q3 = df_tx[(df_tx['TransactionDate'] >= window_3_start) & (df_tx['TransactionDate'] <= cutoff_date)]
         tx_q2 = df_tx[(df_tx['TransactionDate'] >= window_2_start) & (df_tx['TransactionDate'] < window_3_start)]
         tx_q1 = df_tx[(df_tx['TransactionDate'] >= window_1_start) & (df_tx['TransactionDate'] < window_2_start)]
         
-        # Cálculos Generales
-        last_date = df_tx['TransactionDate'].max()
-        days_since = (cutoff_date - last_date).days
-        
-        # Totales por Q
-        count_q1 = len(tx_q1)
-        count_q2 = len(tx_q2)
-        count_q3 = len(tx_q3)
-        
-        # Rates of Change (Tu lógica exacta)
-        rate_q1q2 = (count_q2 - count_q1) / (count_q1 + 1)
-        rate_q2q3 = (count_q3 - count_q2) / (count_q2 + 1)
-        
-        feats_tx = {
-            'avg_tx_amount': df_tx['Amount'].mean(),
-            'days_since_last_tx': days_since,
-            'tx_q1q2_rate_of_change': rate_q1q2,
-            'tx_q2q3_rate_of_change': rate_q2q3
-        }
+        df_tx = pd.concat([tx_q1, tx_q2, tx_q3])  # Asegurarse de usar solo datos dentro de las ventanas
+
+        if df_tx.empty:
+            # Si después de filtrar no queda nada (cliente inactivo hace > 9 meses)
+            # Asignamos valores por defecto de inactividad
+            feats_tx = {
+                'avg_tx_amount': 0.0,
+                'days_since_last_tx': 999, # Penalización por inactividad
+                'tx_q1q2_rate_of_change': 0.0,
+                'tx_q2q3_rate_of_change': 0.0
+            }
+        else:
+            # Cálculos Generales (Solo si hay datos recientes)
+            last_date = df_tx['TransactionDate'].max()
+            days_since = (cutoff_date - last_date).days
+            
+            # Totales por Q
+            count_q1 = len(tx_q1)
+            count_q2 = len(tx_q2)
+            count_q3 = len(tx_q3)
+            
+            # Rates of Change
+            rate_q1q2 = (count_q2 - count_q1) / (count_q1 + 1)
+            rate_q2q3 = (count_q3 - count_q2) / (count_q2 + 1)
+            
+            feats_tx = {
+                'avg_tx_amount': df_tx['Amount'].mean(),
+                'days_since_last_tx': days_since,
+                'tx_q1q2_rate_of_change': rate_q1q2,
+                'tx_q2q3_rate_of_change': rate_q2q3
+            }
 
     # ---------------- PROCESAMIENTO DE SESIONES ----------------
     if not data.sesiones:
@@ -154,53 +166,73 @@ def engineer_features(data: FullCustomerData) -> pd.DataFrame:
         df_ss['SessionDate'] = pd.to_datetime(df_ss['SessionDate'])
         
         # Filtros de Ventana
-        ss_q3 = df_ss[(df_ss['SessionDate'] >= window_3_start)]
+        ss_q3 = df_ss[(df_ss['SessionDate'] >= window_3_start) & (df_ss['SessionDate'] <= cutoff_date)]
         ss_q2 = df_ss[(df_ss['SessionDate'] >= window_2_start) & (df_ss['SessionDate'] < window_3_start)]
         ss_q1 = df_ss[(df_ss['SessionDate'] >= window_1_start) & (df_ss['SessionDate'] < window_2_start)]
         
-        # Cálculos base
-        last_date_ss = df_ss['SessionDate'].max()
-        days_since_ss = (cutoff_date - last_date_ss).days
-        std_duration = df_ss['DurationMin'].std()
-        if pd.isna(std_duration): std_duration = 0.0 # Si hay solo 1 sesión, std es NaN
-        
-        # Lógica Rate of Change (Tu función calculate_change_rate adaptada)
-        c_q1 = len(ss_q1)
-        c_q2 = len(ss_q2)
-        c_q3 = len(ss_q3)
-        
-        def calc_rate(past, current):
-            if past == 0: return 1.0 if current > 0 else 0.0
-            return (current - past) / past
+        df_ss = pd.concat([ss_q1, ss_q2, ss_q3])  # Asegurarse de usar solo datos dentro de las ventanas
 
-        rate_ss_q1q2 = calc_rate(c_q1, c_q2)
-        rate_ss_q2q3 = calc_rate(c_q2, c_q3)
-        
-        # Lógica Failed Ratios
-        def get_ratio(df_subset):
-            total = len(df_subset)
-            if total == 0: return 0.0
-            failed = df_subset['FailedLogin'].sum()
-            return failed / total
+        if df_ss.empty:
+            # Caso 2: Tiene sesiones antiguas, pero NINGUNA en los últimos 9 meses.
+            # Sin este IF, el código fallaría al intentar calcular máximos o desvíos sobre vacío.
+            feats_ss = {
+                'avg_ss_duration': 0.0,
+                'std_ss_duration': 0.0,
+                'days_since_last_ss': 999, # Penalización por inactividad reciente
+                'ss_q1q2_rate_of_change': 0.0,
+                'ss_q2q3_rate_of_change': 0.0,
+                'failed_ratio_spike_q2': 0.0,
+                'failed_ratio_spike_q3': 0.0,
+                'failed_ratio_volatility': 0.0
+            }
+        else:
+            # Caso 3: Tiene actividad reciente. Procedemos con los cálculos.
             
-        ratio_q1 = get_ratio(ss_q1)
-        ratio_q2 = get_ratio(ss_q2)
-        ratio_q3 = get_ratio(ss_q3)
-        
-        spike_q2 = ratio_q2 - ratio_q1
-        spike_q3 = ratio_q3 - ratio_q2
-        volatility = np.std([ratio_q1, ratio_q2, ratio_q3])
-        
-        feats_ss = {
-            'avg_ss_duration': df_ss['DurationMin'].mean(),
-            'std_ss_duration': std_duration,
-            'days_since_last_ss': days_since_ss,
-            'ss_q1q2_rate_of_change': rate_ss_q1q2,
-            'ss_q2q3_rate_of_change': rate_ss_q2q3,
-            'failed_ratio_spike_q2': spike_q2,
-            'failed_ratio_spike_q3': spike_q3,
-            'failed_ratio_volatility': volatility
-        }
+            # Cálculos base
+            last_date_ss = df_ss['SessionDate'].max()
+            days_since_ss = (cutoff_date - last_date_ss).days
+            
+            # Desvío estándar (Controlando si hay 1 solo dato)
+            std_duration = df_ss['DurationMin'].std()
+            if pd.isna(std_duration): std_duration = 0.0
+            
+            # Lógica Rate of Change
+            c_q1 = len(ss_q1)
+            c_q2 = len(ss_q2)
+            c_q3 = len(ss_q3)
+            
+            def calc_rate(past, current):
+                if past == 0: return 1.0 if current > 0 else 0.0
+                return (current - past) / past
+
+            rate_ss_q1q2 = calc_rate(c_q1, c_q2)
+            rate_ss_q2q3 = calc_rate(c_q2, c_q3)
+            
+            # Lógica Failed Ratios (Intentos fallidos)
+            def get_ratio(df_subset):
+                total = len(df_subset)
+                if total == 0: return 0.0
+                failed = df_subset['FailedLogin'].sum()
+                return failed / total
+                
+            ratio_q1 = get_ratio(ss_q1)
+            ratio_q2 = get_ratio(ss_q2)
+            ratio_q3 = get_ratio(ss_q3)
+            
+            spike_q2 = ratio_q2 - ratio_q1
+            spike_q3 = ratio_q3 - ratio_q2
+            volatility = np.std([ratio_q1, ratio_q2, ratio_q3])
+            
+            feats_ss = {
+                'avg_ss_duration': df_ss['DurationMin'].mean(),
+                'std_ss_duration': std_duration,
+                'days_since_last_ss': days_since_ss,
+                'ss_q1q2_rate_of_change': rate_ss_q1q2,
+                'ss_q2q3_rate_of_change': rate_ss_q2q3,
+                'failed_ratio_spike_q2': spike_q2,
+                'failed_ratio_spike_q3': spike_q3,
+                'failed_ratio_volatility': volatility
+            }
 
     # ---------------- ENSAMBLAJE FINAL ----------------
     # Datos base del cliente
@@ -433,7 +465,7 @@ def predict_batch_stats(batch_data: List[FullCustomerData]):
 
     # 2. Convertimos a DataFrame
     df = pd.DataFrame(processed_rows)
-
+    
     if df.empty:
         return {"error": "El batch está vacío"}
 
