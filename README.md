@@ -234,16 +234,38 @@ client['failed_ratio_volatility'] = [(client['total_failed_ss_q1'] / client['tot
 ## 5. Resultados y conclusiones
 ---
 
-* **Conclusiones más relevantes obtenidas a partir de los datos**
-* **Resultado del proyecto: Breve descripción de la solución con imágenes explicativas**
+
+
+### Variables con mayor influencia en el abandono (Churn)
+
+> **`Age`:** Es el mayor predictor individual. Se puede observar que valores elevados en dicha variable conllevan un fuerte SHAP positivo, los cuales contribuyen a la evasión. Existe una gran concentración de clientes que abandonan entre 38 y 51 años. 
+
+> **`NumOfProducts`:** Si bien valores elevados para este feautre parece actuar como protector contra el abandono, también se observa que valores altos pero no máximos contribuyen al abandono, esto podría indicar insatisfacción con algún producto en particular.
+
+> **`ss_q2q3_rate_of_change`:** Fuerte predictor de Churn. Si este ratio tiene un valor negativo (estandarizado) entre -1.5 y -0.5, las probabilidades relativas de abandono aumentan considerablemente -> **-0.32 UMBRAL CRÍTICO DE MONITOREO**
+
+> **`IsActiveMember`:** Como es de esperarse, que un cliente esté clasificado como "Activo", contribuye a la retención, mientras aquellos que no interactúan con la empresa tienen valores SHAP positivos.
+
+> **`days_since_last_tx`:** Factor de alto riesgo, a medida que pasan los días sin que el cliente realize transacciones, más aumentan las probabilidades relativas de abandono.
+
+> **`Gender_Male`:** El hecho de ser mujer (`Gender_Male = 0`) actúa como potenciador en las probabilidades relativas de Churn. Este es un punto crítico a investigar dado que puede haber sesgos de género en productos, ofertas y/o condiciones -> **IMPORTANTE REVISAR POLÍTICAS DE EMPRESA**.
+
+> **`Geography_Germany`:** Ser alemán aumenta las probabilidades relativas de abandono. Será necesario investigar las razones por las cuales los clientes de este país son más propensos a abandonar la empresa.
+
+> **`days_since_last_ss`:** Al igual que días desde la última transacción, mientras más días pasa un cliente sin conectarse a la aplicación de la empresa, más aumenta el riesgo de abandono.
+
+> **`tx_q2q3_rate_of_change`:** Valores altos contribuyen a la retención, mientras que valores bajos están fuertemente asociados al abandono. Una dimsinución en la cantidad de transacciones realizadas en el último período (este feature evalúa la tasa de cambio entre en segundo y tercer trimestre) es un fuerte indicador de abandono.
+
+> **`Balance`:** **CRÍTICO** -> Tener un alto balance contribuye a las probabilidades relativas de abandono, esto refleja que los clientes que deciden dejar la empresa son de alto valor. Resulta de suma importancia investigar este fenómeno en profundidad.
 
 
 ## 6. Tecnologías utilizadas 🛠️
 
-* `<Tech>`
-* `<Tech>`
-* `<Tech>`
-* `<Tech>`
+* `Python`
+* `Jupyter`
+* `FastAPI`
+* `Docker`
+* `Git y GitHub`
 
 
 ## 7. Agradecimientos 🤝
@@ -253,13 +275,5 @@ Presentar agradecimientos para Oracle, Alura, NoCountry y el programa ONE.
 
 ## 8. Desarrolladores del proyecto 👷
 
-* **<Nombre>**
-  - Rol:
-* **<Nombre>**
-  - Rol:
-* **<Nombre>**
-  - Rol: 
-* **<Nombre>**
-  - Rol:
-* **<Nombre>**
-  - Rol:
+* **Ignacio Majo**
+  - Rol: Data Scientist - ML Engineer
