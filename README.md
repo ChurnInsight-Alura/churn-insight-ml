@@ -254,7 +254,7 @@ client['failed_ratio_volatility'] = [(client['total_failed_ss_q1'] / client['tot
 
 > **`days_since_last_ss`:** Al igual que días desde la última transacción, mientras más días pasa un cliente sin conectarse a la aplicación de la empresa, más aumenta el riesgo de abandono.
 
-> **`tx_q2q3_rate_of_change`:** Valores altos contribuyen a la retención, mientras que valores bajos están fuertemente asociados al abandono. Una dimsinución en la cantidad de transacciones realizadas en el último período (este feature evalúa la tasa de cambio entre en segundo y tercer trimestre) es un fuerte indicador de abandono.
+> **`tx_q2q3_rate_of_change`:** Valores altos contribuyen a la retención, mientras que valores bajos están fuertemente asociados al abandono. Una dimsinución en la cantidad de transacciones realizadas en el último período (este feature evalúa la tasa de cambio entre en segundo y tercer trimestre) es un fuerte indicador de abandono.  **-0.03 UMBRAL CRÍTICO DE MONITOREO**
 
 > **`Balance`:** **CRÍTICO** -> Tener un alto balance contribuye a las probabilidades relativas de abandono, esto refleja que los clientes que deciden dejar la empresa son de alto valor. Resulta de suma importancia investigar este fenómeno en profundidad.
 
