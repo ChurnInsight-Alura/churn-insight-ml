@@ -252,7 +252,50 @@ client['failed_ratio_volatility'] = [(client['total_failed_ss_q1'] / client['tot
 ## 5. Resultados y conclusiones
 ---
 
-### Variables con mayor influencia en el abandono (Churn)
+### **5.1 Comparativa de Modelos (Umbral por defecto 0.5)**
+Para la selección del modelo final, se realizaron aproximadamente 4 experimentos por familia de algoritmos, seleccionando un representante de cada una para una evaluación comparativa profunda.
+
+| Model               | Stage    | Accuracy   | Precision  | Recall    | F1-score  | AUC        | Umbral   |
+|---------------------|----------|------------|------------|-----------|-----------|------------|----------|
+| Random Forest       | Test     | 0.8786     | 0.6864     | 0.6658    | 0.6759    | 0.8999     | 0.5      |
+| Logistic Regression | Test     | 0.7780     | 0.4524     | **0.7945**| 0.5765    | 0.8663     | 0.5      |
+| LightGBM Classifier | Test     | 0.8828     | 0.6872     | 0.7041    | **0.6955**| **0.9040** | 0.5      |
+| XGBoost Classifier  | Test     | 0.8791     | 0.6895     | 0.6630    | 0.6760    | 0.8919     | 0.5      |
+
+
+Al observar las métricas generales, LightGBM Classifier muestra el mejor desempeño integral (Mejor F1-Score y AUC). Aunque la Regresión Logística presenta el Recall más alto, su Precisión es extremadamente baja (0.45), lo que implica un exceso de falsos positivos.
+
+### **5.2 Estrategia de Umbrales de Decisión**
+El objetivo de negocio inicial fue capturar el 80% de los fugados (Recall = 0.8). Sin embargo, al ajustar los umbrales para lograr esta sensibilidad, la Precisión de todos los modelos cayó por debajo de 0.60, volviendo las campañas de retención costosas e ineficientes.
+
+Se optó por un compromiso estratégico de Recall = 0.75, logrando identificar 3 de cada 4 fugas potenciales manteniendo una precisión aceptable.
+
+| Model               | Accuracy | Precision | Recall | F1-score | AUC    | Umbral Ajustado |
+|---------------------|----------|-----------|--------|----------|--------|-----------------|
+| Random Forest       | 0.8598   | 0.6048    | 0.7589 | 0.6731   | 0.8999 | 0.40            |
+| Logistic Regression | 0.8150   | 0.5094    | 0.7425 | 0.6042   | 0.8663 | 0.56            |
+| LightGBM Classifier | 0.8583   | 0.6009    | 0.7589 | 0.6707   | 0.9040 | 0.39            |
+| XGBoost Classifier  | 0.8557   | 0.5944    | 0.7589 | 0.6667   | 0.8919 | 0.27            |
+
+### **5.3 Análisis de Generalización (Overfitting vs Underfitting)**
+
+El análisis de las brechas de rendimiento entre entrenamiento y prueba reveló comportamientos críticos:
+
+* **Sobreajuste Severo (Random Forest y XGBoost):** Ambos modelos mostraron métricas casi perfectas en entrenamiento (Recall ~99%) pero caídas drásticas en prueba (~32% de pérdida). "Memorizan" el set de entrenamiento pero fallan al generalizar.
+* **Sobreajuste Moderado (LightGBM):** Si bien presenta una caída en rendimiento, es estructuralmente más robusto, manteniendo un Recall y F1-Score en test superiores a sus competidores de árboles.
+* **Subajuste (Regresión Logística):** Muestra gran estabilidad, pero su simplicidad le impide capturar la complejidad no lineal de los datos.
+
+### **5.4 Modelo Campeón: LightGBM Classifier** 🏆
+
+Se seleccionó LightGBM como el modelo final para producción debido a que:
+
+* Ofrece el mejor equilibrio entre AUC (0.9040) y capacidad de generalización.
+* Logra el objetivo de Recall (0.75) con una precisión competitiva.
+* Mitiga el overfitting severo observado en XGBoost y Random Forest.
+
+### **5.5 Interpretabilidad: Factores de Influencia (SHAP)**
+
+A través del análisis de SHAP Values, desglosamos la "Caja Negra" del modelo para entender qué variables pesan más en la decisión de abandono:
 
 > **`Age`:** Es el mayor predictor individual. Se puede observar que valores elevados en dicha variable conllevan un fuerte SHAP positivo, los cuales contribuyen a la evasión. Existe una gran concentración de clientes que abandonan entre 38 y 51 años. 
 
@@ -286,10 +329,16 @@ client['failed_ratio_volatility'] = [(client['total_failed_ss_q1'] / client['tot
 
 ## 7. Agradecimientos 🤝
 
-Presentar agradecimientos para Oracle, Alura, NoCountry y el programa ONE.
+Este proyecto fue posible gracias al apoyo y formación brindada por:
+
+* **Oracle Next Education (ONE):** Por proporcionar la base educativa y el desafío técnico.
+* **Alura Latam:** Por la excelencia en los cursos de especialización en Data Science.
+* **NoCountry:** Por facilitar el entorno de simulación laboral que permitió llevar este proyecto a un nivel profesional.
+
+Un agradecimiento especial a mis **compañeros de equipo** por la colaboración durante las fases de testing e integración y su **excelente desarrollo tanto de back-end como front-end** para la presentación de una **solución funcional, atractiva y con impacto de negocio**.
 
 
-## 8. Desarrolladores del proyecto 👷
+## 8. Desarrollador del proyecto 👷
 
 * **Ignacio Majo**
   - Rol: Data Scientist - ML Engineer
