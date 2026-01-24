@@ -320,7 +320,7 @@ A través del análisis de SHAP Values, desglosamos la "Caja Negra" del modelo p
 
 ## 6. Tecnologías utilizadas 🛠️
 
-* `Python`
+* `Python` (3.10+)
 * `Jupyter`
 * `FastAPI`
 * `Docker`
