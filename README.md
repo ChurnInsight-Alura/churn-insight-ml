@@ -30,11 +30,7 @@ Reducir la pérdida de cartera vigente y aumentar el Lifetime Value (LTV) del cl
 
 ### **La Solución** 
 
-Hemos desarrollado un MVP End-to-End que integra un modelo de Machine Learning con una API REST funcional.
-
-***Enfoque de Data Science:*** Entrenamos un modelo de clasificación binaria utilizando datos históricos transaccionales y de interacción con la aplicación, así como datos demográficos. Identificamos variables clave <VARIABLES> para evitar la deserción.
-
-***Enfoque de Backend:*** Disponibilizamos el modelo a través de una API (Java/Spring Boot) que permite al negocio consultar el riesgo de un cliente en tiempo real, devolviendo una predicción clara ("Deserción" / "No Deserción") y su probabilidad asociada.
+FastAPI que devuelve predicción utilizando el modelo LightGBM y segmentación de clientes utilizando K-Means, y una clasificación de **Prioridad de Intervención** según el segmento y la probabilidad de abandono.
 
 
 
@@ -43,30 +39,53 @@ Hemos desarrollado un MVP End-to-End que integra un modelo de Machine Learning c
 Para obtener el proyecto tienes dos opciones:
 
 1. Clonar el repositorio utilizando la línea de comandos. Solo debes dirigirte al directorio donde deseas clonar el mismo e ingresar el comando:<br><br>
-   `git clone https://github.com/<link_repositorio>`
+   `git clone https://github.com/ChurnInsight-Alura/churn-insight-ml`
 
 2. O puedes descargarlo directamente desde el repositorio en GitHub en el siguiente enlace:<br>
 
-   [https://github.com/<link_repositorio>](https://github.com/<link_repositorio>)
+   [https://github.com/ChurnInsight-Alura/churn-insight-ml](https://github.com/ChurnInsight-Alura/churn-insight-ml)
 
    Esto te llevará a la siguiente pantalla, donde deberás seguir los siguientes pasos:
 
-
+<img width="1736" height="929" alt="image" src="https://github.com/user-attachments/assets/24daca25-8f42-4ae4-8bce-3d8453c76fce" />
    
 Esto descargará un archivo comprimido `.zip`, que podrás alojar en el directorio que desees.
 
+### **2.1 Ejecución de la API con Docker (Recomendado)**
 
-### **NOTA**:
+Si dispones de Docker instalado, puedes levantar la API completa (incluyendo dependencias y modelos) con un solo comando.
 
-***Aquí deberemos ver la manera de mostrar como "ensamblar" los 3 repositorios para que el usuario obtenga un producto funcional.***
+1. Navega a la carpeta raíz del proyecto clonado y luego a la carpeta llamada 📂api.
+2. Construye y levanta el contenedor:
+
+```bash
+docker build -t custech-api .
+docker run -d -p 8000:8000 custech-api
+```
+
+### **2.2 Pruebas de la API**
+
+Una vez que el contenedor esté corriendo (o si ejecutaste uvicorn main:app --reload localmente), puedes acceder a la documentación interactiva generada automáticamente por Swagger UI.
+
+1. Abre tu navegador y ve a: http://localhost:8000/docs
+2. Verás los endpoints disponibles para realizar predicciones individuales o por lotes.
+
+Endpoints principales:
+
+* POST /predict/user: Predicción para un solo cliente (JSON).
+* POST /predict/batch: Predicción masiva para un archivo con lista de JSONs.
+* POST /predict/batch_stats: Predicción masiva para un archivo con lista de JSONs que genera estadísticas generales para dashboard administrativo (gerencia).
 
 ## 3. Etapas del proyecto 📝
 ---
-<br><br><br>
-Aquí podemos generalizar inicialmente a cada repositorio: Back-end, Front-end, Data Science. Y luego dentro de cada "sección explicar las etapas realizadas para
-cada área.
 
-<br><br><br>
+1. [Consolidación de datasets](https://github.com/ChurnInsight-Alura/churn-insight-ml/blob/main/datasets_consolidation_CusTech.ipynb)
+2. [Análisis Exploratorio de Datos (EDA)](https://github.com/ChurnInsight-Alura/churn-insight-ml/blob/main/EDA_CusTech_Ignacio.ipynb)
+3. [Modelado de datos](https://github.com/ChurnInsight-Alura/churn-insight-ml/blob/main/Modeling_CusTech.ipynb)
+4. [FastAPI](https://github.com/ChurnInsight-Alura/churn-insight-ml/tree/main/api)
+5. [Generación de datos para DEMO](https://github.com/ChurnInsight-Alura/churn-insight-ml/blob/main/datos_demo_CusTech.ipynb)
+
+
 
 ## 4. Catálogo de Datos
 ---
@@ -127,22 +146,22 @@ Para llevar los datos de tiempo a un formato tabular se consideró una ventana d
 * `df_tx` representa el conjunto de transacciones del cliente
 
 > **`avg_tx_amount`**
-```
+```Python
 client['avg_tx_amount'] = df_tx.groupby('CustomerId')['Amount'].mean()
 ```
 
 > **`days_since_last_tx`**
-```
+```Python
 client['days_since_last_tx'] = (CUTOFF_DATE - df_tx['TransactionDate'].max()).dt.days
 ```
 
 > **`tx_q1q2_rate_of_change`**
-```
+```Python
 client['tx_q1q2_rate_of_change'] = (client['total_tx_q2'] - client['total_tx_q1']) / client['total_tx_q1']
 ```
 
 > **`tx_q2q3_rate_of_change`**
-```
+```Python
 client['tx_q2q3_rate_of_change'] = (client['total_tx_q3'] - client['total_tx_q2']) / client['total_tx_q2']
 ```
 
@@ -182,42 +201,42 @@ Explicación del feature engineering para variables compuestas:
 * `df_ss` representa el conjunto de transacciones del cliente
 
 > **`avg_ss_duration`**
-```
+```Python
 client['avg_ss_duration'] = df_ss.groupby('CustomerId')['DurationMin'].mean()
 ```
 
 > **`std_ss_duration`**
-```
+```Python
 client['avg_ss_duration'] = df_ss.groupby('CustomerId')['DurationMin'].std()
 ```
 
 > **`days_since_last_ss`**
-```
+```Python
 client['days_since_last_ss'] = (CUTOFF_DATE - df_ss['SessionDate'].max()).dt.days
 ```
 
 > **`ss_q1q2_rate_of_change`**
-```
+```Python
 client['ss_q1q2_rate_of_change'] = (client['total_ss_q2'] - client['total_ss_q1']) / client['total_ss_q1']
 ```
 
 > **`ss_q2q3_rate_of_change`**
-```
+```Python
 client['ss_q2q3_rate_of_change'] = (client['total_tx_q3'] - client['total_tx_q2']) / client['total_tx_q2']
 ```
 
 > **`failed_ratio_spike_q2`**
-```
+```Python
 client['failed_ratio_spike_q2'] = (client['total_failed_ss_q2'] / client['total_ss_q2']) - (client['total_failed_ss_q1'] / client['total_ss_q1'])
 ```
 
 > **`failed_ratio_spike_q3`**
-```
+```Python
 client['failed_ratio_spike_q3'] = (client['total_failed_ss_q3'] / client['total_ss_q3']) - (client['total_failed_ss_q2'] / client['total_ss_q2'])
 ```
 
 > **`failed_ratio_volatility`** 
-```
+```Python
 client['failed_ratio_volatility'] = [(client['total_failed_ss_q1'] / client['total_ss_q1']), (client['total_failed_ss_q2'] / client['total_ss_q2']), (client['total_failed_ss_q3'] / client['total_ss_q3'])].std()
 ```
 
@@ -233,8 +252,6 @@ client['failed_ratio_volatility'] = [(client['total_failed_ss_q1'] / client['tot
 
 ## 5. Resultados y conclusiones
 ---
-
-
 
 ### Variables con mayor influencia en el abandono (Churn)
 
