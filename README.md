@@ -21,18 +21,17 @@
 
 ## 1. Descripción del proyecto 📚
 ---
-### **Contexto del Negocio** 
+### **Contexto del Negocio**
+En el competitivo sector Fintech, el costo de adquisición de nuevos clientes (CAC) es significativamente más alto que el costo de retención de los existentes. **CusTech**, una empresa ficticia del sector financiero, ha detectado una tasa de abandono (churn) que amenaza la estabilidad de su cartera. La capacidad de predecir qué clientes tienen un alto riesgo de cancelar sus productos permite a la empresa tomar medidas proactivas, optimizando recursos y enfocando estrategias de fidelización.
 
+### **Objetivo**
+Reducir la pérdida de cartera vigente y aumentar el Lifetime Value (LTV) del cliente mediante la implementación de un modelo de Machine Learning capaz de predecir la probabilidad de abandono con antelación, permitiendo intervenciones estratégicas antes de que el cliente finalice su relación con el banco.
 
-### **Objetivo** 
-
-Reducir la pérdida de cartera vigente y aumentar el Lifetime Value (LTV) del cliente mediante 
-
-### **La Solución** 
-
-FastAPI que devuelve predicción utilizando el modelo LightGBM y segmentación de clientes utilizando K-Means, y una clasificación de **Prioridad de Intervención** según el segmento y la probabilidad de abandono.
-
-
+### **La Solución**
+Se desarrolló un pipeline integral que culmina en una **FastAPI** desplegable. La solución incluye:
+1.  **Predicción de Churn:** Utilizando un modelo **LightGBM** optimizado.
+2.  **Segmentación de Clientes:** Agrupamiento mediante **K-Means** para entender perfiles.
+3.  **Matriz de Prioridad:** Clasificación automática de **Prioridad de Intervención** según el segmento y la probabilidad de abandono.
 
 ## 2. Acceso al proyecto 📂
 ---
